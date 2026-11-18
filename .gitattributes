@@ -1,0 +1,8 @@
+# Explicit language attribution for GitHub's language bar
+*.py  linguist-language=Python
+*.ino linguist-language=Arduino
+*.h   linguist-language=C++
+*.sh  linguist-language=Shell
+*.yaml linguist-language=YAML
+*.yml linguist-language=YAML
+Makefile linguist-language=Makefile
