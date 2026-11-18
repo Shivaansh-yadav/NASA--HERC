@@ -23,8 +23,14 @@ plt.rcParams.update({
     'xtick.color': GRAY, 'ytick.color': GRAY, 'axes.grid': True,
     'grid.color': '#D9DDE3', 'grid.linewidth': 0.6, 'figure.dpi': 110,
 })
-OUT = '/home/user/report_assets/computational/'
-import os; os.makedirs(OUT, exist_ok=True)
+import os
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA = os.path.join(ROOT, 'data')
+OUT_APOLLO = os.path.join(ROOT, 'figures', 'apollo')
+OUT_ML = os.path.join(ROOT, 'figures', 'ml')
+OUT_POWER = os.path.join(ROOT, 'figures', 'power')
+for _d in (DATA, OUT_APOLLO, OUT_ML, OUT_POWER):
+    os.makedirs(_d, exist_ok=True)
 
 # ---------------------------------------------------------------- data load
 def load_srp(path):
@@ -52,7 +58,7 @@ tests = {}
 for idx, label in [(6, 'Index 6 (bench, crater edge)'),
                    (7, 'Index 7 (bench, SW of rover)'),
                    (8, 'Index 8 (downhill, north)')]:
-    tests[label] = load_srp(f'/home/user/data/a16_index{idx}.csv')
+    tests[label] = load_srp(os.path.join(DATA, f'a16_index{idx}.csv'))
 
 # ------------------------------------------------- A: Apollo pressure-sinkage + Bekker fit
 def bekker_fit(z_cm, p_kpa):
@@ -82,7 +88,7 @@ ax.set_xlabel('Penetration depth z (cm), Apollo 16 Station 4')
 ax.set_ylabel('Penetration resistance p (kPa)')
 ax.set_title('Lunar soil pressure-sinkage: Apollo 16 SRP measurements with Bekker fits')
 ax.legend(fontsize=7.4, framealpha=0.95, loc='lower right')
-fig.tight_layout(); fig.savefig(OUT + 'figA_srp_bekker.png', dpi=300); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT_APOLLO + '/figA_srp_bekker.png', dpi=300); plt.close(fig)
 
 # mean fitted parameters for lunar site soil
 k_mean = np.mean([f[0] for f in fits]); n_mean = np.mean([f[1] for f in fits])
@@ -113,7 +119,7 @@ cb.set_label('Contact pressure (kPa)', color=NAVY)
 for d_val, lbl, dz in [(0.254, '10 in wheel, static', 0), (0.3048, '12 in wheel, static', 0),
                        (0.254, '10 in wheel, 20 deg climb', 1)]:
     w_pt = 44.1 / 4 * (1 + 3 * dz)
-    z_pt = float(static_sinkage(np.array([w_pt]), np.array([d_val]), k_mean, n_mean))
+    z_pt = float(np.ravel(static_sinkage(np.array([w_pt]), np.array([d_val]), k_mean, n_mean))[0])
     ax.scatter([w_pt], [d_val], [z_pt], s=70, c=[RED if dz else NAVY], depthshade=False, edgecolor='white', zorder=5)
     ax.text(w_pt, d_val, z_pt + 1.2, lbl, fontsize=7.2, color=NAVY)
 ax.set_xlabel('Normal load per wheel (N)')
@@ -121,7 +127,7 @@ ax.set_ylabel('Wheel diameter (m)')
 ax.set_zlabel('Static sinkage (cm)')
 ax.set_title('Predicted wheel sinkage on Apollo 16 soil\n(Bekker parameters fitted to SRP data; lunar gravity)')
 ax.view_init(elev=22, azim=-125)
-fig.tight_layout(); fig.savefig(OUT + 'figB_sinkage_surface.png', dpi=300); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT_APOLLO + '/figB_sinkage_surface.png', dpi=300); plt.close(fig)
 
 # ------------------------------------------------- C: bistable spoke energy landscape
 E = 13.2e6        # Pa, Raise3D Premium TPU-95A TDS (printed, ISO 37)
@@ -157,7 +163,7 @@ cb = fig.colorbar(cf, ax=ax2, pad=0.02); cb.set_label('Strain energy (mJ)', colo
 ax2.set_xlabel('Cam rotation (deg)'); ax2.set_ylabel('Spoke tip deflection (mm)')
 ax2.set_title('Energy landscape: color = energy (4th dimension)')
 fig.suptitle('Camel Wheel bistable spoke: TPU 95A (E = 13.2 MPa) engineering model', color=NAVY, fontweight='bold')
-fig.tight_layout(rect=[0, 0, 1, 0.94]); fig.savefig(OUT + 'figC_bistable.png', dpi=300); plt.close(fig)
+fig.tight_layout(rect=[0, 0, 1, 0.94]); fig.savefig(OUT_ML + '/figC_bistable.png', dpi=300); plt.close(fig)
 
 # ------------------------------------------------- D: slip detection, physics-informed synthetic + logistic regression
 rng = np.random.default_rng(42)
@@ -206,7 +212,7 @@ axs[2].set_yticks([0, 1], ['true: no slip', 'true: slip'])
 axs[2].set_title(f'Confusion matrix (acc = {np.trace(cmat) / N:.1%})')
 fig.suptitle('Onboard wheel-slip detection: physics-informed synthetic training, logistic regression',
              color=NAVY, fontweight='bold')
-fig.tight_layout(rect=[0, 0, 1, 0.93]); fig.savefig(OUT + 'figD_slip_ml.png', dpi=300); plt.close(fig)
+fig.tight_layout(rect=[0, 0, 1, 0.93]); fig.savefig(OUT_ML + '/figD_slip_ml.png', dpi=300); plt.close(fig)
 print('slip AUC:', round(auc, 3))
 
 # ------------------------------------------------- E: power budget over a mock course
@@ -235,7 +241,7 @@ ax3.set_ylabel('Battery SOC (%)', color=RED); ax3.set_ylim(0, 105); ax3.grid(Fal
 h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels(); h3, l3 = ax3.get_legend_handles_labels()
 ax.legend(h1 + h2 + h3, l1 + l2 + l3, fontsize=8, loc='upper right')
 ax.set_title('Lunar-gravity power budget over a mock HERC course (6S 10 Ah pack)')
-fig.tight_layout(); fig.savefig(OUT + 'figE_power.png', dpi=300); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT_POWER + '/figE_power.png', dpi=300); plt.close(fig)
 
 # ------------------------------------------------- F: jamming gripper holding force (3D + color)
 dP = np.linspace(10, 85, 60)          # kPa vacuum
@@ -253,6 +259,6 @@ ax.set_ylabel('Object radius (cm)')
 ax.set_zlabel('Holding force (N)')
 ax.set_title('Granular-jamming holding-force model\nF = alpha x delta-P x pi r^2 (alpha = 0.35)')
 ax.view_init(elev=24, azim=-128)
-fig.tight_layout(); fig.savefig(OUT + 'figF_gripper.png', dpi=300); plt.close(fig)
+fig.tight_layout(); fig.savefig(OUT_POWER + '/figF_gripper.png', dpi=300); plt.close(fig)
 
 print('ALL FIGURES DONE')
