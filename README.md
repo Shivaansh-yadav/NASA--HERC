@@ -10,6 +10,8 @@
 
 [**Proposal (PDF)**](docs/vansh_herc_proposal.pdf) · [**Analysis code**](simulation/) · [**Apollo data**](data/) · [**CAD gallery**](#complete-visual-overview) · [**Tech stack**](#technology-stack)
 
+**Languages:** Python · Arduino C++ · Jupyter Notebook · Makefile
+
 </div>
 
 ---
