@@ -1,0 +1,56 @@
+# Team Vansh HERC 2027: rover parameter sheet
+# Machine-readable mirror of the constants used across the analyses and firmware.
+# Kept in step with simulation/terramechanics_analysis.py and firmware/rover_config.h.
+
+rover:
+  mass_kg: 27.2
+  gravity_lunar_m_s2: 1.62
+  wheel_count: 4
+  wheel_diameter_m: 0.10          # firmware reference wheel; CAD nominal 0.4 m see cad/details/wheel_orthographic.png
+  wheel_radius_powertrain_m: 0.127
+  rpm_cap: 168
+
+drivetrain:
+  motors: "24 V planetary gear motors, one per wheel"
+  continuous_torque_nm_min: 8.0
+  efficiency: 0.6
+  electronics_baseline_w: 6.0
+
+battery:
+  config: "6S2P LiPo"
+  nominal_v: 22.2
+  capacity_ah: 10.0
+
+course:                            # Analysis 6 mock course, 66 m
+  speed_m_s: 0.35
+  segments:                        # [start_m, end_m, slope_deg]
+    - [0, 6, 0]
+    - [6, 14, 10]
+    - [14, 22, 20]
+    - [22, 30, 20]
+    - [30, 38, -5]
+    - [38, 50, 0]
+    - [50, 58, 10]
+    - [58, 66, 0]
+  verified: {peak_current_a: 3.59, soc_end_percent: 98.9}
+
+soil:                              # Analysis 2, Bekker p = k * z^n, Apollo 16 SRP
+  k_mean_kpa_cm_n: 79.8
+  n_mean: 0.57
+  per_run:
+    index6: {k: 29.6, n: 0.61, r2_log: 0.24}
+    index7: {k: 51.8, n: 0.70, r2_log: 0.18}
+    index8: {k: 158.1, n: 0.41, r2_log: 0.10}
+
+slip_detector:                     # Analysis 5, logistic model deployed in firmware
+  beta: [-3.1406, 7.2035, -2.9114]
+  threshold: 0.5
+  release_threshold: 0.35
+  metrics: {auc: 0.99, accuracy: 0.955, missed: 98, false_alarms: 82}
+
+gripper:                           # Analysis 7, granular jamming
+  alpha: 0.35
+  vacuum_kpa: 60
+  object_radius_m: 0.04
+  hold_force_n_min: 100
+  pump_jam_current_ma: 950

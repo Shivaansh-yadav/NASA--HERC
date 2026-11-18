@@ -20,40 +20,7 @@
 #include <Wire.h>
 #include <math.h>
 
-/* ---------------- trained slip detector (notebooks/analysis_walkthrough.ipynb) ----------------
-   logistic model: p = 1 / (1 + exp(-(B0 + B1*dv + B2*pitchRes)))
-   trained coefficients, seeded synthetic set of 4000 samples */
-static const float SLIP_B0 = -3.1406f;
-static const float SLIP_B1 =  7.2035f;   /* feature 1: dv, wheel minus body speed (m/s) */
-static const float SLIP_B2 = -2.9114f;   /* feature 2: IMU pitch rate residual (rad/s)  */
-static const float SLIP_TH =  0.5f;      /* decision threshold on p */
-
-/* ---------------- pins ---------------- */
-static const int PIN_ESC[4]   = {D1, D2, D3, D4};  /* FL FR RL RR, 50 Hz servo PWM */
-static const int PIN_ENC[4]   = {D5, D6, D7, D8};  /* single channel per wheel */
-static const int PIN_PUMP     = D9;                /* gripper pump relay */
-static const int PIN_PUMP_IS  = A2;                /* pump current sense, ADC */
-static const int PIN_BATT     = A1;                /* battery divider, ADC */
-static const int PIN_SDA      = 5;
-static const int PIN_SCL      = 6;
-
-/* ---------------- drivetrain ---------------- */
-static const float WHEEL_DIAM_M   = 0.10f;
-static const float ENC_TICKS_REV  = 12.0f;
-static const float ESC_MIN_US     = 1000.0f;
-static const float ESC_MAX_US     = 2000.0f;
-static const float SLEW_PER_TICK  = 0.02f;  /* max command change per 20 ms tick */
-
-/* ---------------- gripper (Analysis 7) ---------------- */
-static const float PUMP_JAM_MA    = 950.0f; /* current plateau indicating jam  */
-static const uint32_t PUMP_MAX_MS = 8000;   /* absolute pump timeout           */
-
-/* ---------------- telemetry ---------------- */
-static const char* WIFI_SSID = "ROVER_DASHBOARD";
-static const char* WIFI_PASS = "herc2027";
-static const IPAddress DASH_IP(192, 168, 4, 2);
-static const int   DASH_PORT = 8899;
-static const uint32_t TELE_MS = 100;
+#include "rover_config.h"
 
 /* ---------------- state ---------------- */
 enum RoverState { STATE_IDLE, STATE_DRIVE, STATE_PIT, STATE_GRIPPER };

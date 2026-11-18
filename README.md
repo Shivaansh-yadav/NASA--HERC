@@ -10,7 +10,7 @@
 
 [**Proposal (PDF)**](docs/vansh_herc_proposal.pdf) · [**Analysis code**](simulation/) · [**Apollo data**](data/) · [**CAD gallery**](#complete-visual-overview) · [**Tech stack**](#technology-stack)
 
-**Languages:** Python · Arduino C++ · Jupyter Notebook · Makefile
+**Languages:** Python · Arduino C++ · C++ header · Jupyter Notebook · Makefile · Shell · YAML
 
 </div>
 
@@ -98,7 +98,11 @@ teamvansh-herc-2027/
 │   └── analysis_walkthrough.ipynb   # executed walkthrough with outputs
 ├── firmware/
 │   └── rover_firmware.ino           # XIAO ESP32S3 reference firmware (Arduino C++)
-├── Makefile                         # make figures / notebook / firmware
+├── configs/
+│   └── rover_params.yaml            # machine-readable parameter sheet (analyses + firmware)
+├── scripts/
+│   └── setup_env.sh                 # one-command development environment setup
+├── Makefile                         # make setup / figures / notebook / firmware
 ├── data/
 │   ├── a16_index5.csv               # Apollo 16 SRP, Station 4 (background)
 │   ├── a16_index6.csv               # SRP run 6 (bench, crater edge)
@@ -193,6 +197,7 @@ It reduces to a two-coefficient threshold and runs **every control tick on the X
 - 4 channel ESC PWM (LEDC) with exponential slew limiting and a link-loss failsafe
 - Wheel encoder counting on interrupts and IMU reading over I2C
 - The trained slip detector from Analysis 5 deployed as a fixed threshold: slip if 7.2035 · dv − 2.9114 · pitchRes − 3.1406 > 0 (trained AUC 0.99, accuracy 95.5%), torque gated on slip and re-engaged with hysteresis below 0.35
+- All pins and constants live in `firmware/rover_config.h`, mirrored in `configs/rover_params.yaml`
 - Granular-jamming gripper control: pump runs until the current-sense plateau confirms the jam (Analysis 7)
 - 10 Hz UDP JSON telemetry (battery, per-wheel speeds, slip flag, state) for the laptop dashboard
 
@@ -203,7 +208,7 @@ Compile with `make firmware` (arduino-cli, board `esp32:esp32:XIAO_ESP32S3`).
 ```bash
 git clone https://github.com/Shivaansh-yadav/NASA--HERC.git
 cd NASA--HERC
-pip install numpy matplotlib
+./scripts/setup_env.sh            # or: pip install numpy matplotlib
 python3 simulation/terramechanics_analysis.py    # or: make figures
 jupyter notebook notebooks/analysis_walkthrough.ipynb
 ```

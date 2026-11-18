@@ -1,9 +1,12 @@
 PY := python3
 NB := notebooks/analysis_walkthrough.ipynb
 
-.PHONY: all figures notebook firmware clean
+.PHONY: all setup figures notebook firmware clean
 
 all: figures notebook
+
+setup:
+	bash scripts/setup_env.sh
 
 figures:
 	$(PY) simulation/terramechanics_analysis.py
