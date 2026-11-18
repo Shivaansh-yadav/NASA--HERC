@@ -77,9 +77,10 @@ teamvansh-herc-2027/
 │   ├── ml/                          # spoke energy landscape + slip detector
 │   └── power/                       # power budget + gripper model
 ├── cad/
-│   ├── assembly/                    # full rover: hero, exploded, cover art
-│   ├── parts/                       # wheel + gripper CAD and alt views
-│   └── details/                     # orthographic drawing, joints, 14 subsystem renders
+│   ├── assembly/                    # rover: hero, 4 orthographic views, alt, exploded, cover
+│   ├── parts/                       # wheel + gripper CAD and all alternates
+│   ├── details/                     # orthographic drawing, joints, subsystem renders
+│   └── art/                         # cover/back art drafts, concept sketch, patch, glyph
 └── docs/
     ├── vansh_herc_proposal.pdf      # full 12-page proposal
     └── team_patch.png               # mission patch
@@ -186,10 +187,15 @@ Figures regenerate into `figures/…` exactly as committed. Runtime: a few secon
 
 ## 9. CAD documentation
 
-### Assembly — `cad/assembly/`
+### Assembly — `cad/assembly/` (8 views)
 | File | View |
 |---|---|
 | `rover_full_render.png` | Hero studio render |
+| `rover_front.png` | Front view |
+| `rover_side.png` | Side view |
+| `rover_top.png` | Top view |
+| `rover_rear.png` | Rear view |
+| `rover_alt.png` | Alternate three-quarter view |
 | `rover_exploded.png` | Exploded: frame, wheels, mast, gripper, batteries |
 | `cover_art.png` | Proposal cover artwork |
 
@@ -198,6 +204,8 @@ Figures regenerate into `figures/…` exactly as committed. Runtime: a few secon
 |---|---|
 | `wheel_cad.png` | Camel Wheel CAD model |
 | `wheel_low_angle.png` | Camel Wheel, low-angle render |
+| `wheel_alt1.png` | Camel Wheel, alternate render 1 |
+| `wheel_alt2.png` | Camel Wheel, alternate render 2 |
 | `gripper_cad.png` | Gripper arm CAD |
 | `gripper_alt.png` | Gripper, alternate view |
 
@@ -206,6 +214,7 @@ Figures regenerate into `figures/…` exactly as committed. Runtime: a few secon
 |---|---|
 | `wheel_orthographic.png` | 1:5 drawing: Ø400 × 80 mm, 20 mm hub, 10 mm tread |
 | `joint_render.png` | ROVER-JOINT-04: machined socket + QR pin |
+| `joint_render_macro.png` | Joint, close-up alternate render |
 | `chassis_layout.png` | Top/bottom views, steering detail, RC config |
 | `cad_frame_blueprint.png` | Bare space frame, blueprint style |
 | `cad_wheel_exploded.png` | Tread ring + hub exploded |
@@ -222,6 +231,18 @@ Figures regenerate into `figures/…` exactly as committed. Runtime: a few secon
 | `part_gripper_arm.png` | Gripper arm alone |
 | `part_battery_deck.png` | Battery boxes alone |
 
+### Art and branding — `cad/art/`
+| File | Description |
+|---|---|
+| `cover_art_v1.png` | Proposal cover, first draft |
+| `cover_art_v2.png` | Proposal cover, second draft |
+| `cover_art_final.png` | Proposal cover, final |
+| `back_cover_v1.png` | Back cover, first draft |
+| `back_cover_v2.png` | Back cover, final |
+| `concept_sketch.png` | Early rover concept sketch |
+| `herc_glyph.png` | HERC glyph |
+| `mission_patch_full.png` | Full-resolution mission patch |
+
 ---
 
 ## 10. Design gallery
@@ -230,10 +251,18 @@ Figures regenerate into `figures/…` exactly as committed. Runtime: a few secon
 |:---:|:---:|
 | ![Rover](cad/assembly/rover_full_render.png) | ![Exploded](cad/assembly/rover_exploded.png) |
 | *Full assembly* | *Exploded view* |
+| ![Front](cad/assembly/rover_front.png) | ![Side](cad/assembly/rover_side.png) |
+| *Front view* | *Side view* |
+| ![Top](cad/assembly/rover_top.png) | ![Rear](cad/assembly/rover_rear.png) |
+| *Top view* | *Rear view* |
 | ![Wheel drawing](cad/details/wheel_orthographic.png) | ![Blueprint](cad/details/cad_frame_blueprint.png) |
 | *Camel Wheel 1:5 drawing* | *Bare space frame* |
+| ![Wheel](cad/parts/wheel_cad.png) | ![Gripper](cad/parts/gripper_cad.png) |
+| *Camel Wheel CAD* | *Gripper arm CAD* |
 | ![Spokes](figures/ml/figC_bistable.png) | ![Slip](figures/ml/figD_slip_ml.png) |
 | *Bistable energy landscape* | *Slip-detection ROC* |
+| ![Cover](cad/art/cover_art_final.png) | ![Patch](docs/team_patch.png) |
+| *Proposal cover art* | *Mission patch* |
 
 ---
 
