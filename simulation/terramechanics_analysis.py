@@ -227,8 +227,9 @@ eta = 0.6
 P_motor = np.abs(tau_wheel) * omega / eta + 6      # + 6 W baseline electronics
 I_bus = P_motor.sum() * np.ones_like(dist) if P_motor.ndim == 0 else (P_motor * 4 / 24 + 0.25)
 Wh = 22.2 * 10     # 6S2P 22.2 V, 10 Ah
-soc = 100 - np.cumsum(I_bus) * (dist[1] - dist[0] / (0.35)) / Wh * 100 * 0.35
-soc = 100 - np.cumsum(I_bus * (dist[1] - dist[0]) / 0.35) / Wh * 100
+Ah_pack = 10.0                        # 6S2P pack capacity
+dt = (dist[1] - dist[0]) / 0.35       # seconds per step at 0.35 m/s
+soc = 100 - np.cumsum(I_bus * dt) / 3600 / Ah_pack * 100
 fig, ax = plt.subplots(figsize=(7.8, 4.4))
 ax.fill_between(dist, 0, slope, color=GOLD, alpha=0.35, label='course slope (right axis)')
 ax.set_xlabel('Course distance (m)'); ax.set_ylabel('Slope (deg)', color=GOLD_INK)
@@ -242,6 +243,7 @@ h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels(
 ax.legend(h1 + h2 + h3, l1 + l2 + l3, fontsize=8, loc='upper right')
 ax.set_title('Lunar-gravity power budget over a mock HERC course (6S 10 Ah pack)')
 fig.tight_layout(); fig.savefig(OUT_POWER + '/figE_power.png', dpi=300); plt.close(fig)
+print(f'power: peak I={I_bus.max():.2f} A, SOC end={soc[-1]:.1f}%')
 
 # ------------------------------------------------- F: jamming gripper holding force (3D + color)
 dP = np.linspace(10, 85, 60)          # kPa vacuum

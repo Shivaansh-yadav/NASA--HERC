@@ -4,3 +4,8 @@
 __pycache__/
 *.pyc
 .DS_Store
+.ipynb_checkpoints/
+*.elf
+*.bin
+*.hex
+.pio/

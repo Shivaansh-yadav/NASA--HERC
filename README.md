@@ -25,6 +25,7 @@ Everything quantitative behind our proposal lives here:
 - **Wheel-slip machine-learning study** for onboard detection
 - **Lunar-gravity power budget** over a mock course
 - **Granular-jamming gripper holding-force model**
+- **Rover reference firmware (C++)** for the XIAO ESP32S3, deploying the slip detector onboard
 - **Complete visual documentation**: 46 images, assembly to individual parts, every art asset, every result figure
 
 Every figure in the proposal is reproducible from `simulation/terramechanics_analysis.py`.
@@ -55,7 +56,7 @@ Every figure in the proposal is reproducible from `simulation/terramechanics_ana
 | <img src="assets/logos/icon_printer.png" width="52"/> | **FDM 3D printing (TPU 95A)** | Camel Wheel spokes and tread, gripper parts |
 | <img src="assets/logos/icon_gripper.png" width="52"/> | **Granular-jamming gripper** | Latex bladder + granular media + 12 V pump for the task tool |
 | <img src="assets/logos/seeed.png" width="52"/> | **Seeed Studio** | XIAO ESP32S3 maker |
-| <img src="assets/logos/arduino.png" width="60"/> | **Arduino toolchain** | Firmware build and flashing for the ESP32S3 |
+| <img src="assets/logos/arduino.png" width="60"/> | **Arduino toolchain** | Rover firmware in C++: `firmware/rover_firmware.ino` |
 
 ---
 
@@ -91,6 +92,11 @@ teamvansh-herc-2027/
 ├── LICENSE
 ├── simulation/
 │   └── terramechanics_analysis.py   # all six analyses, one runnable script
+├── notebooks/
+│   └── analysis_walkthrough.ipynb   # executed walkthrough with outputs
+├── firmware/
+│   └── rover_firmware.ino           # XIAO ESP32S3 reference firmware (Arduino C++)
+├── Makefile                         # make figures / notebook / firmware
 ├── data/
 │   ├── a16_index5.csv               # Apollo 16 SRP, Station 4 (background)
 │   ├── a16_index6.csv               # SRP run 6 (bench, crater edge)
@@ -121,13 +127,14 @@ The soil model is anchored to **real measurements made on the Moon**. We use the
 
 Terramechanics models plate penetration as a power law: **p = k·z^n**. Fitting (log-log least squares) to each run:
 
-| Run | k (kPa·cm^-n) | n | R2 |
+| Run | k (kPa·cm^-n) | n | R2 (log space) |
 |---|---|---|---|
-| Index 6 (bench, crater edge) | about 80 | 0.61 | 0.63 |
-| Index 7 (bench, SW) | about 60 | 0.68 | 0.69 |
-| Index 8 (downhill, N) | about 150 | 0.41 | 0.70 |
+| Index 6 (bench, crater edge) | 29.6 | 0.61 | 0.24 |
+| Index 7 (bench, SW) | 51.8 | 0.70 | 0.18 |
+| Index 8 (downhill, N) | 158.1 | 0.41 | 0.10 |
+| **Mean (site soil)** | **79.8** | **0.57** | |
 
-**Design takeaway:** lunar soil resists penetration strongly in the first centimetres and hardens with depth (n < 1), so static wheel sinkage stays small and the mass budget goes to **traction adaptivity** (the Camel Wheel), not extreme ground clearance.
+R2 in log space is modest (0.10 to 0.24) because the SRP points scatter; the robust takeaway is the exponent. **Design takeaway:** n < 1 means lunar soil hardens with depth, so static wheel sinkage stays small and the mass budget goes to **traction adaptivity** (the Camel Wheel), not extreme ground clearance.
 
 <img src="figures/apollo/figA_srp_bekker.png" width="640" alt="Bekker fits"/>
 
@@ -155,8 +162,8 @@ A physics-informed synthetic dataset (4,000 samples; slip states from a regolith
 | Metric | Result |
 |---|---|
 | ROC AUC | **0.99** |
-| Accuracy at 0.5 | **95.4%** |
-| Missed slips | 188 / 2,000 |
+| Accuracy at 0.5 | **95.5%** |
+| Missed slips | 98 / 2,000 |
 | False alarms | 82 / 2,000 |
 
 It reduces to a two-coefficient threshold and runs **every control tick on the XIAO ESP32S3**, cutting motor command when slip is detected.
@@ -165,7 +172,7 @@ It reduces to a two-coefficient threshold and runs **every control tick on the X
 
 ## 6. Lunar-gravity power budget
 
-66 m mock course (0/10°/20° segments), Crr = 0.18, 0.5 m/s, drivetrain efficiency 0.6, 6 W electronics, 6S 10 Ah pack: peak draw on 20° climbs is about **3.7 A**, flats about **1 A**, state of charge at course end **99.2%**. The pack is sized with wide margin for a full day of runs, saving mass inside the 60 lb envelope.
+66 m mock course (0/10°/20° segments), Crr = 0.18, 0.5 m/s, drivetrain efficiency 0.6, 6 W electronics, 6S 10 Ah pack: peak draw on 20° climbs is about **3.6 A**, flats about **1.3 A**, state of charge at course end **98.9%**. The pack is sized with wide margin for a full day of runs, saving mass inside the 60 lb envelope.
 
 <img src="figures/power/figE_power.png" width="640" alt="Power budget"/>
 
@@ -177,16 +184,29 @@ It reduces to a two-coefficient threshold and runs **every control tick on the X
 
 ---
 
-## 8. Reproduce everything
+## 8. Onboard firmware (Arduino C++)
+
+`firmware/rover_firmware.ino` is the reference sketch for the rover control board (Seeed Studio XIAO ESP32S3, ESP32 Arduino framework, no external libraries):
+
+- 4 channel ESC PWM (LEDC) with exponential slew limiting and a link-loss failsafe
+- Wheel encoder counting on interrupts and IMU reading over I2C
+- The trained slip detector from Analysis 5 deployed as a fixed threshold: slip if 7.2035 · dv − 2.9114 · pitchRes − 3.1406 > 0 (trained AUC 0.99, accuracy 95.5%), torque gated on slip and re-engaged with hysteresis below 0.35
+- Granular-jamming gripper control: pump runs until the current-sense plateau confirms the jam (Analysis 7)
+- 10 Hz UDP JSON telemetry (battery, per-wheel speeds, slip flag, state) for the laptop dashboard
+
+Compile with `make firmware` (arduino-cli, board `esp32:esp32:XIAO_ESP32S3`).
+
+## 9. Reproduce everything
 
 ```bash
 git clone https://github.com/Shivaansh-yadav/NASA--HERC.git
 cd NASA--HERC
 pip install numpy matplotlib
-python3 simulation/terramechanics_analysis.py
+python3 simulation/terramechanics_analysis.py    # or: make figures
+jupyter notebook notebooks/analysis_walkthrough.ipynb
 ```
 
-The script reads `data/a16_index5..8.csv` and regenerates all six figures into `figures/apollo`, `figures/ml` and `figures/power`, exactly as committed. Runtime: a few seconds. Dependencies: NumPy and Matplotlib only. All random draws are seeded.
+The script reads `data/a16_index5..8.csv` and regenerates all six figures into `figures/apollo`, `figures/ml` and `figures/power`, exactly as committed. Runtime: a few seconds. Dependencies: NumPy and Matplotlib only. All random draws are seeded. The notebook runs the same steps with intermediate numbers visible, including the trained slip coefficients that ship in the firmware.
 
 ---
 
